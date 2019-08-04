@@ -185,6 +185,9 @@ ENV/
 # Rope project settings
 .ropeproject
 
+# PyCharm settings
+.idea
+
 ### Emacs ###
 # -*- mode: gitignore; -*-
 *~
