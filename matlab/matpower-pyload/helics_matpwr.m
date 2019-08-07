@@ -7,77 +7,78 @@
 %     $ python hmp_load.py
 
 
-%% Initialize 
-% HELICS library in MATLAB
-helicsStartup()
-% MATPOWER paths (for this run only)
-if not(exist('case5','file'))
-    fprintf('MATPOWER case5.m file not found in path, setting up MATPOWER temporarily\n')
-    install_matpower(1, 0, 0); %options: temp update, permanant, verbose, remove first
-end
-
-%Various
-idx.LMP = 14;
-idx.P_load = 3;
-
-
-%% Configuration
-%Local setup
+%% Configuration/Setup
+% Local setup
 my_fed_name = 'HMP_MATLAB';
 my_endpt_name = 'ISO';
 
-%Timing
+% Powerflow case
+mp_case = 'case5';
+init_load_scale = 0.4825;
+
+% Timing
 deltat = 60;  %Base time interval (seconds)
 sced_interval = 15*60;    %Time in sec, must be >0
 response_delay = 3*60;   %Time in sec after receiving loads to publish LMPs
 sim_duration = 24*60*60;    %Total simulation time in sec
+
+wait_timeout = 60;  %Maximum wall clock time to wait for other federate response (sec)
+
+%Information about the other federate
+their_fed_name = 'HMP_python';
+their_endpt_name = 'Loads_all';
+
+% HELICS options
+hmp_start_broker = true;    % Optionally start the broker from this federate
+
+%MATPOWER helpers
+mp_idx.LMP = 14;
+mp_idx.P_load = 3;
+
+
+%% Initialize 
+% MATPOWER paths (for this run only)
+if not(exist('mpver','file'))
+    fprintf('MATPOWER mpver.m file not found in path, adding MATPOWER to path for this session\n')
+    install_matpower(1, 0, 0); %options: temp path update, permanant, verbose, remove first
+end
+
+% Compute derived quantities
 n_t_step = round(sim_duration/sced_interval);
 
-response_timeout = 60;  %Maximum wall clock time to wait for other federate response
-
-%Setup powerflow case, and load info for co-simulation
-mp_case = 'case5';
+% Setup powerflow case
 pf_case = loadcase(mp_case);
-base_loads = pf_case.bus(:, idx.P_load);
+base_loads = pf_case.bus(:, mp_idx.P_load);
 n_bus = length(base_loads);
 bus_names = cell(n_bus, 1);
 for b = 1:n_bus
     bus_names{b,1} = sprintf('b%d', b);
 end
+
+% Setup load
 load_idx = find(base_loads > 0);
-load_node_map = [bus_names(load_mask), num2cell(load_idx)];
+load_node_map = [bus_names(load_idx), num2cell(load_idx)];
 n_loads = size(load_node_map,1);
+init_load_scale = init_load_scale * ones(n_bus, 1);
 
-init_load_scale = 0.4825 * ones(n_bus, 1);
-
-%Information about the other federate
-their_fed_name = 'HMP_python';
-their_endpt_name = 'Loads_all';
+% Configure Federate info, etc.
 their_endpt_fullname = sprintf('%s/%s', their_fed_name, their_endpt_name);
 
-% % IMPORTANT, Message federates are not granted times
-% % earlier than they request, so the final time request must match that of
-% % the other federate or the federate requesting the later time will
-% % hang. As a work around we ensure we use the same delay for this final
-% % request.
-% %TODO: more gracefully handle 2 federates requesting unequal final times
-% their_response_delay = 1*60;
+%% HELICS-related startup
+% Load HELICS library in MATLAB, funcations available via helics.*
+helicsStartup()
 
-% HELICS options
-% Optionally start the broker from this federate
-hmp_start_broker = true;
-
-%% Provide summary information
+% Provide summary information
 helicsversion = helics.helicsGetVersion();
 
 fprintf('%s: Helics version = %s\n', my_fed_name, helicsversion)
 
-%% Create broker (if desired)
+% Create broker (if desired)
 if hmp_start_broker
     broker=hmp_broker_setup();
 end
 
-%% Create HELICS Federate
+% Create HELICS Federate
 my_fed = hmp_fed_setup(my_fed_name, deltat);
 
 %% Add message endpoints and value data pub/sub
@@ -96,30 +97,56 @@ end
 
 
 %% Start execution
-% Warning, entering execution will hang if the other federates don't join
-fprintf('%s: Attempting to entering execution mode...',my_fed_name);
-helics.helicsFederateEnterExecutingMode(my_fed);
-fprintf('SUCCESS\n');
+% Use asynchronous execution start so we can run a time out
+fprintf('%s: Attempting to entering execution mode (async)...',my_fed_name);
+
+%Start Exectution mode and timeout timer
+helics.helicsFederateEnterExecutingModeAsync(my_fed);
+timeout_clock = tic;
+
+while toc(timeout_clock) < wait_timeout && not(helics.helicsFederateIsAsyncOperationCompleted(my_fed))
+        pause(0.01)
+end
+
+if helics.helicsFederateIsAsyncOperationCompleted(my_fed)
+    helics.helicsFederateEnterExecutingModeComplete(my_fed)
+    fprintf('SUCCESS\n')
+else
+    fprintf('TIMEOUT (%d sec)\n', wait_timeout)
+    fprintf('Shutting down...')
+    % Note: our federate is stuck so won't respond to graceful cleaning
+    if hmp_start_broker
+        helics.helicsBrokerDestroy(broker); 
+        fprintf('Broker...')
+    end
+    try
+        helics.helicsCloseLibrary();
+        fprintf('Library...')
+    catch
+        fprintf('(Can''t close Library)...')
+    end
+    fprintf('Bye\n\n')
+end
 
 %% Pre-execution
 % Initialize time
 granted_time = 0;
-next_t = 0;
+
 % Initialize data storage
 lmp = zeros(n_bus, n_t_step);
 P_load = zeros(n_bus, n_t_step);
 
 % Compute initial loads and first lmp
-P_load(:, next_t+1) = base_loads .* init_load_scale;
+P_load(:, 1) = base_loads .* init_load_scale;
 
 % Setup plot 
 
 
 %% Execution Loop
-for next_t = sced_interval:sced_interval:sim_duration
+for t_idx = 2:n_t_step+1    %SHift by one for period 0
     % Run OPF and compute prices 
-    lmp(:, next_t+1) = hmp_run_opf(pf_case, P_load(:, next_t+1));
-    str_to_send = hmp_lmp2json(lmp(:, next_t+1), load_node_map);
+    lmp(:, t_idx) = hmp_run_opf(pf_case, P_load(:, t_idx-1));
+    str_to_send = hmp_lmp2json(lmp(:, t_idx), load_node_map);
 
     %Send current prices
     fprintf('%s: Sending message "%s" from "%s" to "%s" at time %4.1f... ', ...
@@ -128,12 +155,13 @@ for next_t = sced_interval:sced_interval:sim_duration
     fprintf('DONE \n');
 
     %Wait for other federate to send the load data via multiple subscriptions (with timeout)
+    fprintf('Waiting for Data from load federate(s)...')
     timeout_clock = tic;
     data_rx = false(n_loads,1);
-    while toc(timeout_clock) < response_timeout
+    while toc(timeout_clock) < wait_timeout
         for node_idx = 1:n_loads
             % Update the record of which data has been received
-            data_rx(node_idx) = data_rx(node_idx) || helicsInputIsUpdated(sub(node_idx));
+            data_rx(node_idx) = data_rx(node_idx) || helics.helicsInputIsUpdated(sub(node_idx));
         end
         
         % Check if we have gotten all of the load data
@@ -145,10 +173,18 @@ for next_t = sced_interval:sced_interval:sim_duration
         end
     end
     
+    if all(data_rx)
+        fprintf('RECEIVED\n')
+    else
+        fprintf('TIMEOUT (%d sec)\n', wait_timeout)
+        
+    end
+    
     %Gather sent data
     for node_idx = 1:n_loads
-        value = helicsInputGetDouble(sub(node_idx));
-        fprintf('PI RECEIVER: Received value = %g at time %4.1f from PI SENDER\n', value, granted_time);
+        P_load(node_idx, t_id) = helicsInputGetDouble(sub(node_idx));
+        fprintf('%s: Received actual load of %gMW at time %4.1f from %s\n', ...
+            my_fed_name, P_load(node_idx, t_id), granted_time, load_node_map{node_idx, 1});
     end
     
     %Wait for desired next time

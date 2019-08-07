@@ -10,15 +10,15 @@ end
 
 
 %% Create broker
-disp('Creating Broker');
+fprintf('Creating Broker...');
 broker = helics.helicsCreateBroker(helics_core_type, '', broker_initstring);
-disp('Created Broker');
+fprintf('COMPLETE\n');
 
 fprintf('Checking if Broker is connected...');
 isconnected = helics.helicsBrokerIsConnected(broker);
 
 if isconnected == 1
-    fprintf('SUCCESS, Broker created and connected\n');
+    fprintf('CONNECTED\n');
 else
     fprintf('\n')
     error('NOT CONNECTED (helicsBrokerIsConnected return = %d)', isconnected)
