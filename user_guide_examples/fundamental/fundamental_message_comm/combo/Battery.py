@@ -79,23 +79,16 @@ if __name__ == "__main__":
     print(f'Created federate {federate_name}')
 
     sub_count = h.helicsFederateGetInputCount(fed)
-    logger.debug(f'\tNumber of subscriptions: {sub_count}')
     pub_count = h.helicsFederateGetPublicationCount(fed)
-    logger.debug(f'\tNumber of publications: {pub_count}')
-
-    # Diagnostics to confirm JSON config correctly added the required
-    #   publications and subscriptions
     subid = {}
     for i in range(0, sub_count):
         subid[i] = h.helicsFederateGetInputByIndex(fed, i)
         sub_name = h.helicsSubscriptionGetKey(subid[i])
-        logger.debug(f'\tRegistered subscription---> {sub_name}')
-
     pubid = {}
     for i in range(0, pub_count):
         pubid[i] = h.helicsFederateGetPublicationByIndex(fed, i)
         pub_name = h.helicsPublicationGetKey(pubid[i])
-        logger.debug(f'\tRegistered publication---> {pub_name}')
+
 
     ##############  Entering Execution Mode  ##################################
     h.helicsFederateEnterExecutingMode(fed)
