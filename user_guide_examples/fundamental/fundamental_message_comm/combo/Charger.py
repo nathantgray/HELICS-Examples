@@ -260,9 +260,7 @@ if __name__ == "__main__":
 
             # Send message to Controller with SOC every 15 minutes
             if grantedtime % 900 == 0:
-                h.helicsEndpointSendBytesTo(endid[j], "",
-                                               f'{currentsoc[j]:4f}'.encode(
-                                               ))  #
+                h.helicsEndpointSendBytesTo(endid[j], "",f'{currentsoc[j]:4f}'.encode())  #
                 logger.debug(f'Sent message from endpoint {endpoint_name}'
                              f' at time {grantedtime}'
                              f' with payload SOC {currentsoc[j]:4f}')
