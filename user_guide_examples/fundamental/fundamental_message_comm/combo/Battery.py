@@ -120,12 +120,9 @@ if __name__ == "__main__":
 
     # As long as granted time is in the time range to be simulated...
     while grantedtime < total_interval:
-
-        # Time request for the next physical interval to be simulated
         requested_time = (grantedtime+update_interval)
-        logger.debug(f'Requesting time {requested_time}')
         grantedtime = h.helicsFederateRequestTime (fed, requested_time)
-        logger.debug(f'Granted time {grantedtime}')
+
 
         for j in range(0,sub_count):
             logger.debug(f'Battery {j+1} time {grantedtime}')
