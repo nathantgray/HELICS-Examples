@@ -68,6 +68,30 @@ def get_new_battery(numBattery):
     return listOfBatts
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 if __name__ == "__main__":
     np.random.seed(2622)
 
@@ -98,6 +122,27 @@ if __name__ == "__main__":
     ##############  Entering Execution Mode  ##################################
     h.helicsFederateEnterExecutingMode(fed)
     logger.info("Entered HELICS execution mode")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     # Define battery physics as empirical values
     socs = np.array([0, 1])
