@@ -95,7 +95,7 @@ def get_new_battery(numBattery):
 if __name__ == "__main__":
     np.random.seed(2622)
 
-    ##########  Registering  federate and configuring from JSON################
+    ##########  Registering  federate and configuring from JSON ################
     fed = h.helicsCreateValueFederateFromConfig("BatteryConfig.json")
 
     logger.info(f"Created federate {fed.name}")
