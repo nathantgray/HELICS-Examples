@@ -93,7 +93,6 @@ def get_new_battery(numBattery):
 
 
 if __name__ == "__main__":
-    np.random.seed(2622)
 
     fed = h.helicsCreateValueFederateFromConfig("BatteryConfig.json")
     federate_name = h.helicsFederateGetName(fed)
@@ -140,6 +139,7 @@ if __name__ == "__main__":
 
 
 
+    np.random.seed(2622)
     # Define battery physics as empirical values
     socs = np.array([0, 1])
 
