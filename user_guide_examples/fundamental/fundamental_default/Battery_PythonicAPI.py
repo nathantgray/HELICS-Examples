@@ -95,22 +95,18 @@ def get_new_battery(numBattery):
 if __name__ == "__main__":
     np.random.seed(2622)
 
-    ##########  Registering  federate and configuring from JSON ################
     fed = h.helicsCreateValueFederateFromConfig("BatteryConfig.json")
 
     logger.info(f"Created federate {fed.name}")
     logger.debug(f"\tNumber of subscriptions: {fed.n_inputs}")
     logger.debug(f"\tNumber of publications: {fed.n_publications}")
 
-    # Diagnostics to confirm JSON config correctly added the required
-    #   publications and subscriptions
     for k, v in fed.subscriptions.items():
         logger.debug(f"\tRegistered subscription---> {k}")
 
     for k, v in fed.publications.items():
         logger.debug(f"\tRegistered publication---> {k}")
 
-    ##############  Entering Execution Mode  ##################################
     fed.enter_executing_mode()
     logger.info("Entered HELICS execution mode")
 
