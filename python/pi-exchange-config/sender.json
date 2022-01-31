@@ -5,11 +5,11 @@
   "name": "sender",
   "offset": 0.0,
   "period": 0.1,
+  "timeDelta": 0.1,
   "publications": [
     {
       "global": true,
       "name": "data"
     }
-  ],
-  "timeDelta": 0.1
+  ]
 }

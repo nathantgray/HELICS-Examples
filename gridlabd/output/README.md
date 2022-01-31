@@ -1,0 +1,1 @@
+Output from GridLAB-D simulation is saved here.
