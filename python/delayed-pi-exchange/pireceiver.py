@@ -53,9 +53,9 @@ prevtime = 0
 currenttime = -1
 
 while currenttime <= 100:
-
+    print(f"Requesting time: {100}")
     currenttime = h.helicsFederateRequestTime(vfed, 100)
-
+    print(f"Granted time: {currenttime}")
     value = h.helicsInputGetString(sub)
     print(
         "PI RECEIVER: Received value = {} at time {} from PI SENDER".format(

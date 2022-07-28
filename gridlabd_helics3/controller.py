@@ -4,6 +4,7 @@ import time
 import struct
 import matplotlib.pyplot as plt
 
+
 initstring = "-f 2 --name=mainbroker"
 broker = h.helicsCreateBroker("zmq", "", initstring)
 
@@ -29,16 +30,14 @@ sw45_p = []
 while granted_time < request_time:
     granted_time = h.helicsFederateRequestTime(fed, request_time)
     print(granted_time)
-    n3_va_obj = h.helicsInputGetComplexObject(sub_n3_va)
-    n5_va_obj = h.helicsInputGetComplexObject(sub_n5_va)
-    n3_va.append(abs(n3_va_obj.real + 1j*n3_va_obj.imag))
-    n5_va.append(abs(n5_va_obj.real + 1j*n5_va_obj.imag))
-    sw23_p.append(h.helicsInputGetComplexObject(sub_sw23_p).imag)
-    sw45_p.append(h.helicsInputGetComplexObject(sub_sw45_p).imag)
+    n3_va.append(abs(h.helicsInputGetComplex(sub_n3_va)))
+    n5_va.append(abs(h.helicsInputGetComplex(sub_n5_va)))
+    sw23_p.append(h.helicsInputGetComplex(sub_sw23_p).imag)
+    sw45_p.append(h.helicsInputGetComplex(sub_sw45_p).imag)
     if granted_time == 3:
-        h.helicsPublicationPublishRaw(pub_load3_a, "400000.0+1.0j")
-        h.helicsPublicationPublishRaw(pub_load3_b, "400000.0+1.0j")
-        h.helicsPublicationPublishRaw(pub_load3_c, "400000.0+1.0j")
+        h.helicsPublicationPublishRaw(pub_load3_a, "400000.0+0.0j")
+        h.helicsPublicationPublishRaw(pub_load3_b, "400000.0+0.0j")
+        h.helicsPublicationPublishRaw(pub_load3_c, "400000.0+0.0j")
         print(f"{granted_time}: sending publication")
     # print(f"{granted_time}: Message : {data}  requested time: {request_time}")
 
