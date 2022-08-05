@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import helics as h
-import time
-import struct
+# import time
+# import struct
 import matplotlib.pyplot as plt
 
 
@@ -35,9 +35,9 @@ while granted_time < request_time:
     sw23_p.append(h.helicsInputGetComplex(sub_sw23_p).imag)
     sw45_p.append(h.helicsInputGetComplex(sub_sw45_p).imag)
     if granted_time == 3:
-        h.helicsPublicationPublishRaw(pub_load3_a, "400000.0+0.0j")
-        h.helicsPublicationPublishRaw(pub_load3_b, "400000.0+0.0j")
-        h.helicsPublicationPublishRaw(pub_load3_c, "400000.0+0.0j")
+        h.helicsPublicationPublishComplex(pub_load3_a, 400000.0, 0.0)
+        h.helicsPublicationPublishComplex(pub_load3_b, 400000.0, 0.0)
+        h.helicsPublicationPublishComplex(pub_load3_c, 400000.0, 0.0)
         print(f"{granted_time}: sending publication")
     # print(f"{granted_time}: Message : {data}  requested time: {request_time}")
 

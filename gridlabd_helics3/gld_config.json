@@ -1,10 +1,12 @@
 {
+  "coreInit": "--federates=1",
   "name": "gld",
-  "core_name": "gld",
+  "coreName": "gld",
   "log_level": "debug",
   "coreType": "zmq",
   "only_transmit_on_change": false,
   "period": 1,
+  "logfile": "output/gld_output.log",
   "publications": [
     {
       "key": "node_3_A",
