@@ -1,7 +1,7 @@
 {
   "name": "ctr",
   "core_name": "ctr",
-  "log_level": 6,
+  "log_level": "debug",
   "coreType": "zmq",
   "period": 0.00,
   "timeDelta": 1,
