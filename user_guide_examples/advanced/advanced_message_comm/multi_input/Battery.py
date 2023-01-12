@@ -22,10 +22,10 @@ source input, defined in ChargerController.json.
 trevor.hardy@pnnl.gov
 """
 
+import matplotlib.pyplot as plt
 import helics as h
 import logging
 import numpy as np
-import matplotlib.pyplot as plt
 import sys
 
 
@@ -102,14 +102,14 @@ if __name__ == "__main__":
     sub_name = {}
     for i in range(0, sub_count):
         subid[i] = h.helicsFederateGetInputByIndex(fed, i)
-        sub_name[i] = h.helicsSubscriptionGetKey(subid[i])
+        sub_name[i] = h.helicsSubscriptionGetTarget(subid[i])
         logger.debug(f'\tRegistered subscription---> {sub_name[i]}')
 
     pubid = {}
     pub_name = {}
     for i in range(0, pub_count):
         pubid[i] = h.helicsFederateGetPublicationByIndex(fed, i)
-        pub_name[i] = h.helicsPublicationGetKey(pubid[i])
+        pub_name[i] = h.helicsPublicationGetName(pubid[i])
         logger.debug(f'\tRegistered publication---> {pub_name[i]}')
 
 

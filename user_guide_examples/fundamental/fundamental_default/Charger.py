@@ -12,10 +12,10 @@ intelligence and simply applies a constant charging voltage.
 trevor.hardy@pnnl.gov
 """
 
+import matplotlib.pyplot as plt
 import helics as h
 import logging
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 logger = logging.getLogger(__name__)
@@ -158,7 +158,7 @@ if __name__ == "__main__":
     # Apply initial charging voltage
     for j in range(0, pub_count):
         h.helicsPublicationPublishDouble(pubid[j], charging_voltage[j])
-        logger.debug(f"\tPublishing charging voltage of {charging_voltage[j]}"
+        logger.debug(f"\tPublishing {h.helicsPublicationGetName(pubid[j])} of {charging_voltage[j]}"
                     f" at time {grantedtime}")
 
     ########## Main co-simulation loop ########################################
@@ -182,7 +182,7 @@ if __name__ == "__main__":
 
             # Publish updated charging voltage
             h.helicsPublicationPublishDouble(pubid[j], charging_voltage[j])
-            logger.debug(f"\tPublishing charging voltage of {charging_voltage[j]}"
+            logger.debug(f"\tPublishing {h.helicsPublicationGetName(pubid[j])} of {charging_voltage[j]}"
                          f" at time {grantedtime}")
 
         # Calculate the total power required by all chargers. This is the
@@ -191,7 +191,7 @@ if __name__ == "__main__":
         total_power = 0
         for j in range(0, pub_count):
             if charging_current[j] > 0:  # EV is still charging
-                total_power += charge_rate[(EVlist[j] - 1)]
+                total_power += (charging_voltage[j] * charging_current[j])
 
         # Data collection vectors
         time_sim.append(grantedtime)
@@ -206,7 +206,7 @@ if __name__ == "__main__":
     yaxis = np.array(power)
 
     plt.plot(xaxis, yaxis, color="tab:blue", linestyle="-")
-    plt.yticks(np.arange(0, 100, 10))
+    plt.yticks(np.arange(0, 11000, 1000))
     plt.ylabel("kW")
     plt.grid(True)
     plt.xlabel("time (hr)")

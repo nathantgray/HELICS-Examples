@@ -14,10 +14,10 @@ SOC modeled by the charger. Each battery ceases charging when its SOC reaches 10
 trevor.hardy@pnnl.gov
 """
 
+import matplotlib.pyplot as plt
 import helics as h
 import logging
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 logger = logging.getLogger(__name__)
@@ -73,7 +73,7 @@ def get_new_battery(numBattery):
 
 
 if __name__ == "__main__":
-    np.random.seed(2622)
+    np.random.seed(628)
 
     ##########  Registering  federate and configuring from JSON################
     fed = h.helicsCreateValueFederateFromConfig("BatteryConfig.json")
@@ -163,7 +163,7 @@ if __name__ == "__main__":
 
             # Publish out charging current
             h.helicsPublicationPublishDouble(pubid[j], charging_current)
-            logger.debug(f"\tPublished {pub_name[j]} with value " f"{charging_current:.2f}")
+            logger.debug(f"\tPublished {h.helicsPublicationGetName(pubid[j])} with value " f"{charging_current:.2f}")
 
             # Store SOC for later analysis/graphing
             if pubid[j] not in soc:

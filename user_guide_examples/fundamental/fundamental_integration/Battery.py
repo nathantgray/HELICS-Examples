@@ -17,10 +17,10 @@ registers them with the HELICS API.
 trevor.hardy@pnnl.gov
 """
 
+import matplotlib.pyplot as plt
 import helics as h
 import logging
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 logger = logging.getLogger(__name__)
@@ -95,7 +95,7 @@ def get_new_battery(numBattery):
 
 
 if __name__ == "__main__":
-    np.random.seed(2622)
+    np.random.seed(628)
 
     ##########  Registering  federate and configuring with API################
     fedinitstring = " --federates=1"

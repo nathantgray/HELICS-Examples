@@ -21,10 +21,10 @@ distinct charging points each with their own meter.)
 trevor.hardy@pnnl.gov
 """
 
+import matplotlib.pyplot as plt
 import helics as h
 import logging
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 logger = logging.getLogger(__name__)
@@ -116,7 +116,7 @@ if __name__ == "__main__":
     pubid = {}
     for i in range(0, pub_count):
         pubid[i] = h.helicsFederateGetPublicationByIndex(fed, i)
-        pub_name = h.helicsPublicationGetKey(pubid[i])
+        pub_name = h.helicsPublicationGetName(pubid[i])
         logger.debug(f'\tRegistered publication---> {pub_name}')
 
 

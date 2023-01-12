@@ -13,6 +13,6 @@ while granted_time < 10:
     data = h.helicsInputGetDouble(sub)
     print(f"{granted_time}: Message : {data}  requested time: {request_time}")
 
-h.helicsFederateFinalize(fed)
+h.helicsFederateDisconnect(fed)
 h.helicsFederateFree(fed)
 h.helicsCloseLibrary()

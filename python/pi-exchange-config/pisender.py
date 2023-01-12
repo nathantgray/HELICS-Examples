@@ -17,6 +17,6 @@ for request_time in range(1, 10):
     h.helicsPublicationPublishDouble(pub, request_time)
     print(f"{granted_time}: {math.pi}")
 
-h.helicsFederateFinalize(fed)
+h.helicsFederateDisconnect(fed)
 h.helicsFederateFree(fed)
 h.helicsCloseLibrary()
